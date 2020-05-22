@@ -148,7 +148,7 @@
 		text-align: left
 	}
 
-	.container > div {
+	.container > div > div {
 		margin-bottom: 25px;
 	}
 
