@@ -1,25 +1,31 @@
 <template>
 	<div class="container">
-		<div>
-			<b>학번을 입력하세요. (예시: 10101)</b><br>
-			<mdc-textfield v-model="num" label="학번" outline required :helptext="numHelperText" helptext-validation :valid="numValid"/>
-		</div>
-		<div>
-			<b>이름을 입력하세요.</b><br>
-			<mdc-textfield style="margin: 0;" v-model="name" label="이름" outline required :helptext="nameHelperText" helptext-validation :valid="nameValid"/>
-		</div>
-		<div>
-			<b style="margin-bottom: 20px; display: block;">동아리를 선택하세요.</b>
-			<mdc-linear-progress v-if="groupList === null" indeterminate></mdc-linear-progress>
-			<div v-else v-for="data of (groupList ? groupList : [])">
-				<mdc-radio name="groups" :value="String(data.id)" :key="data.id" v-model="group" :label="`${data.name}, ${!data.available ? '마감됨' : `${data.available}명 남음`}`" :disabled="!data.available"/>
-				<br>
+		<div v-if="!success">
+			<div>
+				<b>학번을 입력하세요. (예시: 10101)</b><br>
+				<mdc-textfield v-model="num" label="학번" outline required :helptext="numHelperText" helptext-validation :valid="numValid"/>
+			</div>
+			<div>
+				<b>이름을 입력하세요.</b><br>
+				<mdc-textfield style="margin: 0;" v-model="name" label="이름" outline required :helptext="nameHelperText" helptext-validation :valid="nameValid"/>
+			</div>
+			<div>
+				<b style="margin-bottom: 20px; display: block;">동아리를 선택하세요.</b>
+				<mdc-linear-progress v-if="groupList === null" indeterminate></mdc-linear-progress>
+				<div v-else v-for="data of (groupList ? groupList : [])">
+					<mdc-radio name="groups" :value="String(data.id)" :key="data.id" v-model="group"
+					           :label="`${data.name}, ${!data.available ? '마감됨' : `${data.available}명 남음`}`" :disabled="!data.available"/>
+					<br>
+				</div>
+			</div>
+			<div>
+				<p style="color: red;">{{ errorText }}</p>
+				<mdc-button unelevated @click="send" v-if="!sending">신청</mdc-button>
+				<mdc-button unelevated v-else disabled>신청 중...</mdc-button>
 			</div>
 		</div>
-		<div>
-			<p style="color: red;">{{ errorText }}</p>
-			<mdc-button unelevated @click="send" v-if="!sending">신청</mdc-button>
-			<mdc-button unelevated v-else disabled>신청 중...</mdc-button>
+		<div v-else>
+			<h4>신청이 완료되었습니다.</h4>
 		</div>
 	</div>
 </template>
@@ -36,7 +42,9 @@
 				group: null,
 				groupList: null,
 				errorText: null,
-				sending: false
+				sending: false,
+
+				success: false
 			}
 		},
 		computed: {
@@ -64,24 +72,13 @@
 					await new Promise(r1 => {
 						setTimeout(() => r1(), 2000)
 					});
-
-					r([
-						{
-							id: 0,
-							name: "국어 동아리",
-							available: 10
-						},
-						{
-							id: 1,
-							name: "수학 동아리",
-							available: 5
-						},
-						{
-							id: 2,
-							name: "정보 동아리",
-							available: 0
-						},
-					]/*await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'}).data*/);
+					let res = (await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'})).data;
+					if (res.status !== 0) {
+						alert("동아리 리스트를 불러오지 못했습니다.\n새로고침합니다.");
+						location.reload();
+						return;
+					}
+					r(res.result);
 				});
 			},
 			send() {
@@ -109,8 +106,9 @@
 					return;
 				}
 				selected = selected.shift();
-				if (!selected.available){
+				if (!selected.available) {
 					this.errorText = "선택한 동아리는 신청이 마감되었습니다.";
+					this.sending = false;
 					return;
 				}
 				axios.post("https://group.dnhs.me/api/application/", {
@@ -123,6 +121,12 @@
 					timeoutErrorMessage: "timeout"
 				}).then(res => {
 					this.sending = false;
+					if (res.data.groups !== undefined) this.groupList = res.data.groups;
+					if (res.data.status === 0) {
+						this.success = true;
+					}else{
+						this.errorText = res.data.message === undefined ? "code: " + res.data.status : res.data.message;
+					}
 				}).catch(res => {
 					this.sending = false;
 					if (res.message === "timeout") {
