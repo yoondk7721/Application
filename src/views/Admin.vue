@@ -1,6 +1,6 @@
 <template>
-	<div style="text-align: center; width: 100%">
-		<div v-if="!isLogin">
+	<div style="width: 100%">
+		<div v-if="!isLogin" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
 			<div style="margin-bottom: 10px">
 				<h3>관리자 페이지 로그인</h3>
 			</div>
