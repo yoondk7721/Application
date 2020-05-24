@@ -69,13 +69,11 @@
 		methods: {
 			getGroupsList() {
 				return new Promise(async (r) => {
-					await new Promise(r1 => {
-						setTimeout(() => r1(), 2000)
-					});
 					let res;
 					try {
 						res = (await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'})).data;
 					}catch (e) {
+						res = e.response.data;
 						console.log(res);
 					}
 					if (res.status !== 0) {
