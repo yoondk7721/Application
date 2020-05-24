@@ -5,6 +5,7 @@ import VueMDCAdapter from 'vue-mdc-adapter'
 import './theme.scss'
 import App from './App'
 import router from './router'
+import store from './store'
 
 Vue.config.productionTip = false
 
@@ -14,6 +15,7 @@ Vue.use(VueMDCAdapter)
 new Vue({
 	el: '#app',
 	router,
+	store,
 	template: '<App/>',
 	components: {App}
 })

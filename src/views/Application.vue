@@ -72,7 +72,12 @@
 					await new Promise(r1 => {
 						setTimeout(() => r1(), 2000)
 					});
-					let res = (await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'})).data;
+					let res;
+					try {
+						res = (await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'})).data;
+					}catch (e) {
+						console.log(res);
+					}
 					if (res.status !== 0) {
 						alert("동아리 리스트를 불러오지 못했습니다.\n새로고침합니다.");
 						location.reload();
