@@ -1,5 +1,5 @@
 <template>
-	<div style="text-align: left; width: 100%">
+	<div style="text-align: center; width: 100%">
 		<div v-if="!isLogin">
 			<div style="margin-bottom: 10px">
 				<h3>관리자 페이지 로그인</h3>
@@ -8,7 +8,7 @@
 				<mdc-textfield v-model="id" label="아이디" outline required/>
 			</div>
 			<div style="margin-bottom: 25px">
-				<mdc-textfield v-model="pw" label="비밀번호" outline required/>
+				<mdc-textfield v-model="pw" label="비밀번호" outline required type="password"/>
 			</div>
 			<div>
 				<p style="color: red; margin-bottom: 30px;">{{ errorText }}</p>
