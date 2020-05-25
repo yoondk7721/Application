@@ -17,6 +17,9 @@
 			</div>
 		</div>
 		<div v-else class="container">
+			<span style="text-align: right; position: fixed; right: 30px; bottom: 30px;" @click="refresh">
+				<mdc-button><i style="font-size: 200%; display: flex; align-items: center; justify-content: center;" class="material-icons mdc-button__icon">update</i></mdc-button>
+			</span>
 			<div class="register">
 				<h3>동아리 목록</h3>
 				<table style="table-layout: auto;">
@@ -95,6 +98,11 @@
 				this.sending = false;
 				if (!this.isLogin) {
 					this.errorText = "아이디나 비밀번호가 틀렸습니다.";
+				}
+			},
+			async refresh() {
+				if (this.isLogin) {
+					await this.$store.dispatch('login', this.$store.getters.credentials);
 				}
 			}
 		}

@@ -37,6 +37,9 @@ export default new Vuex.Store({
 		}
 	},
 	getters: {
+		credentials(state) {
+			return {id: state.id, pw: state.pw};
+		},
 		isLogin(state) {
 			return state.isLogin;
 		},
