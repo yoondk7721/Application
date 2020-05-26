@@ -1,6 +1,11 @@
 <template>
 	<div class="container">
-		<div v-if="!success">
+		<div v-if="!success && time > 0">
+			<h4>신청 기간이 아닙니다.</h4>
+			<p>{{ `${time / 3600 > 0 ? `${time / 3600}시간 ` : ''}${(time / 60) % 60 > 0 ? `${(time / 60) % 60}분 ` : ''}${time % 60 > 0 ? `${time % 60}초` : ''}`
+				}} 이후 신청이 시작됩니다.</p>
+		</div>
+		<div v-else-if="!success">
 			<div>
 				<b>학번을 입력하세요. (예시: 10101)</b><br>
 				<mdc-textfield v-model="num" label="학번" outline required :helptext="numHelperText" helptext-validation :valid="numValid"/>
@@ -43,6 +48,8 @@
 				groupList: null,
 				errorText: null,
 				sending: false,
+				time: 0,
+				timeInterval: null,
 
 				success: false
 			}
@@ -72,15 +79,20 @@
 					let res;
 					try {
 						res = (await axios.post("https://group.dnhs.me/api/groups", {}, {responseType: 'json'})).data;
-					}catch (e) {
+					} catch (e) {
 						res = e.response.data;
-						console.log(res);
+						//console.log(res);
 					}
-					if (res.status !== 0) {
+
+					if (res.status !== 0 && res.time !== undefined) {
+						this.setWaitTime((res.time / 1000) | 0);
+						return;
+					} else if (res.status !== 0) {
 						alert("동아리 리스트를 불러오지 못했습니다.\n새로고침합니다.");
 						location.reload();
 						return;
 					}
+
 					r(res.result);
 				});
 			},
@@ -125,9 +137,10 @@
 				}).then(res => {
 					this.sending = false;
 					if (res.data.groups !== undefined) this.groupList = res.data.groups;
+					if (res.data.time !== undefined) this.time = res.data.time;
 					if (res.data.status === 0) {
 						this.success = true;
-					}else{
+					} else {
 						this.errorText = res.data.message === undefined ? "code: " + res.data.status : res.data.message;
 					}
 				}).catch(res => {
@@ -136,6 +149,23 @@
 						this.errorText = "timeout";
 					}
 				});
+			},
+			setWaitTime(time) {
+				if (this.timeInterval !== null) {
+					clearInterval(this.timeInterval);
+				}
+
+				this.time = time;
+				this.timeInterval = setInterval(() => {
+					this.time = this.time - 1000;
+					if (this.time < 1000) {
+						this.time = 0;
+						clearInterval(this.timeInterval);
+						this.getGroupsList().then(data => {
+							this.groupList = data;
+						});
+					}
+				}, 1000);
 			}
 		},
 		created() {
