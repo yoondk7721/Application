@@ -25,6 +25,7 @@
 			</div>
 			<div>
 				<p style="color: red;">{{ errorText }}</p>
+				<p style="color: red; font-size: 70%;">동시접속자가 많을 경우 서버 지연이 될 수 있으므로 신청 후 기다려주세요.</p>
 				<mdc-button unelevated @click="send" v-if="!sending">신청</mdc-button>
 				<mdc-button unelevated v-else disabled>신청 중...</mdc-button>
 			</div>
@@ -132,7 +133,7 @@
 					group: parseInt(this.group)
 				}, {
 					responseType: "json",
-					timeout: 1000 * 10,
+					timeout: 1000 * 20,
 					timeoutErrorMessage: "timeout"
 				}).then(res => {
 					this.sending = false;
