@@ -1,6 +1,10 @@
 <template>
 	<div class="container">
-		<div v-if="!success && time > 0">
+		<div v-if="init">
+			<h3>잠시만 기다려주세요</h3>
+			<mdc-linear-progress v-if="groupList === null" indeterminate></mdc-linear-progress>
+		</div>
+		<div v-else-if="!success && time > 0">
 			<h2>신청 기간이 아닙니다.</h2>
 			<p>{{ `${((time / 3600) | 0) > 0 ? `${(time / 3600) | 0}시간 ` : ''}${((time / 60) | 0) % 60 > 0 ? `${((time / 60) | 0) % 60}분 ` : ''}${time % 60 > 0 ? `${time % 60}초` : ''}`
 				}} 이후 신청이 시작됩니다.</p>
@@ -43,6 +47,8 @@
 		name: 'Application',
 		data() {
 			return {
+				init: true,
+
 				num: null,
 				name: null,
 				group: null,
@@ -84,6 +90,7 @@
 						res = e.response.data;
 						//console.log(res);
 					}
+					this.init = false;
 
 					if (res.status !== 0 && res.time !== undefined) {
 						this.setWaitTime((res.time / 1000) | 0);
