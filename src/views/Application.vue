@@ -4,6 +4,10 @@
 			<h3>잠시만 기다려주세요</h3>
 			<mdc-linear-progress v-if="groupList === null" indeterminate></mdc-linear-progress>
 		</div>
+		<div v-else-if="!success && finish">
+			<h2>신청 기간이 아닙니다.</h2>
+			<p>신청이 종료되었습니다.</p>
+		</div>
 		<div v-else-if="!success && time > 0">
 			<h2>신청 기간이 아닙니다.</h2>
 			<p>{{ `${((time / 3600) | 0) > 0 ? `${(time / 3600) | 0}시간 ` : ''}${((time / 60) | 0) % 60 > 0 ? `${((time / 60) | 0) % 60}분 ` : ''}${time % 60 > 0 ? `${time % 60}초` : ''}`
@@ -49,14 +53,17 @@
 			return {
 				init: true,
 
+				finish: false,
+
+				time: 0,
+				timeInterval: null,
+
 				num: null,
 				name: null,
 				group: null,
 				groupList: null,
 				errorText: null,
 				sending: false,
-				time: 0,
-				timeInterval: null,
 
 				success: false
 			}
@@ -94,6 +101,9 @@
 
 					if (res.status !== 0 && res.time !== undefined) {
 						this.setWaitTime((res.time / 1000) | 0);
+						return;
+					} else if (res.status !== 0 && res.finish === true) {
+						this.finish = true;
 						return;
 					} else if (res.status !== 0) {
 						alert("동아리 리스트를 불러오지 못했습니다.\n새로고침합니다.");
