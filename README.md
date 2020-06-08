@@ -1,3 +1,3 @@
-# group.dnhs.me
+# Application /  DNHS
 
-> 동래고등학교 동아리 신청 웹페이지
+> 동래고등학교 각종 신청 페이지 (프론트엔드)
